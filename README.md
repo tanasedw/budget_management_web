@@ -5,6 +5,17 @@ Users submit budget requests by division, managers approve through a workflow, a
 
 ---
 
+> **Continuing this project with Claude?**
+> Start your new conversation with:
+> ```
+> I'm continuing the budget management web project.
+> Read CLAUDE.md and README.md for full context.
+> ```
+
+---
+
+---
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
