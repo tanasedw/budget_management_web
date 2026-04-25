@@ -384,9 +384,42 @@ CREATE TABLE approval_log (
 
 | Table | Source | Load Method |
 |-------|--------|-------------|
-| `actuals_data` | SAP export (Excel) | Fabric Notebook — monthly |
+| `accruals_data` | SAP export (Excel) — FAGLL03H | Fabric Notebook — monthly |
 | `budget_master` | Board-approved Excel upload | Fabric Notebook — yearly |
-| `combined_data` | Merge actuals + budget | Fabric Notebook — after each load |
+| `combined_data` | Merge accruals + budget | Fabric Notebook — after each load |
+
+### ตารางข้อมูล Accruals — Schema (26 คอลัม)
+
+ข้อมูล G/L Line Items ระดับ transaction จาก SAP T-Code FAGLL03H ใช้เป็น Actuals สำหรับ Dashboard
+
+| # | Column Name | Data Type | ตัวอย่าง |
+|---|-------------|-----------|---------|
+| 1 | Company Code | VARCHAR | `1000` |
+| 2 | G/L Account | VARCHAR | `5120300020` |
+| 3 | G/L Account: Long Text | VARCHAR | `Oil Expenses` |
+| 4 | Posting Date | DATE | `2026-03-19` |
+| 5 | Ledger | VARCHAR | `0L` |
+| 6 | Company Code Currency Key | VARCHAR | `THB` |
+| 7 | Company Code Currency Value | DECIMAL | `4480.10` |
+| 8 | Cost Center | VARCHAR | `TKTRUCK` |
+| 9 | Cost Center: Long Text | VARCHAR | `TK-Truck` |
+| 10 | Profit Center | VARCHAR | `1000` |
+| 11 | Assignment | VARCHAR | `TKTRUCK` |
+| 12 | Document Number | VARCHAR | `5300016837` |
+| 13 | Document type | VARCHAR | `WA` |
+| 14 | Transaction Code | VARCHAR | `MB1A` |
+| 15 | Entry Date | DATE | `2026-03-22` |
+| 16 | Order: Short Text | VARCHAR | `99-5424/T12` |
+| 17 | Text | VARCHAR | `Mileage : 304760 KM` |
+| 18 | Order | VARCHAR | `OXXTK008` |
+| 19 | Quantity | DECIMAL | `140` |
+| 20 | Unit of Measure | VARCHAR | `L` |
+| 21 | Purchasing Document | VARCHAR | *(blank)* |
+| 22 | Invoice Reference | VARCHAR | `5300016837` |
+| 23 | G/L Account (dup) | VARCHAR | `5120300020` |
+| 24 | Fiscal Year | INT | `2026` |
+| 25 | Object Class | VARCHAR | `Overhead` |
+| 26 | Debit/Credit ind | CHAR(1) | `S` |
 
 ---
 
@@ -459,7 +492,11 @@ Budget dept opens cycle
         │
         ▼
 Users log in → fill budget form (by GL Account, by month)
-  - Template 1.1: Main budget per GL Account
+  - Template 1.1: Main budget per GL Account — shows Budget & Actuals by business line (สายงาน)
+    - Header: สายงาน + หน่วยงาน
+    - Columns: GL Code | GL Name | Budget prior year | Normalized prior year | YTD Actuals | Monthly Actuals (Jan-Dec) | Budget next year total | Monthly Budget Input (Jan-Dec) ← user fills
+    - GL Groups: Communication, Electricity & Water, Entertainment, Lease & Rental, Office Expenses, Other Admin, Other Manpower, Personal, Prof & Legal Fee, Repair & Maintenance, Travelling
+    - GL items linked to sub-templates show note "(กรอกข้อมูลที่ชีท ...)" and auto-pull total from sub-sheet
   - Template 1.2: Detail for Oversea Trip / Lease&Rental / Fuel / Prof&Legal Fee
         │
         ▼
@@ -482,7 +519,10 @@ Warapornt final approval
   Reject  → status: REJECTED_BY_MANAGER → Email to all
         │
         ▼
-Budget dept uploads board-approved budget (Excel batch upload)
+Budget dept uploads board-approved budget (Excel batch upload — Template 2 "งบประมาณกำหนดเอง")
+        │
+        ▼
+Template 1.1 data + Template 2 data → merged into combined data file ("ไฟล์รวม Data")
         │
         ▼
 Dashboard available: Budget vs Actuals by division / GL Account / month
